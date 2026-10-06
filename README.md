@@ -216,4 +216,4 @@ npx skills@latest add hongzuoj-pixel/distinct-video-faces
 
 ## License
 
-MIT © 2026 Ailin JIN
+MIT © 2026 金宏祚
