@@ -46,7 +46,85 @@ def normalized(value: Any) -> str:
     return " ".join(str(value).strip().lower().split())
 
 
-def audit(data: dict[str, Any]) -> dict[str, Any]:
+# Same logic as audit_character_pack.py: content words plus CJK bigrams,
+# dropping generic stopwords and generic anatomical bigrams so the identity
+# lock overlap measures the specific, distinctive wording.
+STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "the",
+    "with",
+    "has",
+    "have",
+    "slight",
+    "slightly",
+    "subtle",
+    "natural",
+    "face",
+    "eyes",
+    "eye",
+}
+CJK_STOP_BIGRAMS = {
+    "下巴",
+    "下颌",
+    "人中",
+    "五官",
+    "嘴唇",
+    "鼻子",
+    "鼻梁",
+    "鼻尖",
+    "鼻翼",
+    "眼睛",
+    "眼距",
+    "眼窝",
+    "眼睑",
+    "眉毛",
+    "脸型",
+    "脸颊",
+    "颧骨",
+    "额头",
+    "皮肤",
+    "耳朵",
+    "耳垂",
+    "头发",
+    "发际",
+    "发型",
+    "轮廓",
+}
+
+
+def tokens(value: Any) -> set[str]:
+    text = normalized(value)
+    latin = {
+        token
+        for token in re.findall(r"[a-z0-9]+", text)
+        if len(token) > 1 and token not in STOPWORDS
+    }
+    bigrams = {
+        sequence[index : index + 2]
+        for sequence in re.findall(r"[\u3400-\u9fff]+", text)
+        for index in range(max(0, len(sequence) - 1))
+        if sequence[index : index + 2] not in CJK_STOP_BIGRAMS
+    }
+    return latin | bigrams
+
+
+def token_overlap(needle: str, haystack: str) -> float:
+    """Fraction of the needle's content tokens that appear in the haystack."""
+    needle_tokens = tokens(needle)
+    if not needle_tokens:
+        return 0.0
+    haystack_tokens = tokens(haystack)
+    return len(needle_tokens & haystack_tokens) / len(needle_tokens)
+
+
+def audit(
+    data: dict[str, Any],
+    lock_warn_overlap: float = 0.85,
+    max_camera_moves: int = 2,
+    max_shot_seconds: float = 8.0,
+) -> dict[str, Any]:
     errors: list[str] = []
     warnings: list[str] = []
     shots = data.get("shots")
@@ -69,6 +147,8 @@ def audit(data: dict[str, Any]) -> dict[str, Any]:
         if not name or not lock:
             errors.append(f"characters[{index}] requires `name` and `identity_lock`.")
             continue
+        if name in identity_locks:
+            errors.append(f"Duplicate character name: {character.get('name')}.")
         identity_locks[name] = lock
 
     seen_ids: set[str] = set()
@@ -102,21 +182,32 @@ def audit(data: dict[str, Any]) -> dict[str, Any]:
             warnings.append(f"{shot.get('id', label)} has no preservation anchors.")
         if not isinstance(avoid, list) or not avoid:
             warnings.append(f"{shot.get('id', label)} has no shot-specific avoid constraints.")
+        duration = shot.get("duration_seconds")
+        if not isinstance(duration, (int, float)) or isinstance(duration, bool) or duration <= 0:
+            errors.append(f"{shot.get('id', label)} requires a positive numeric duration_seconds.")
 
         for cast_name in cast:
             key = normalized(cast_name)
             if key not in identity_locks:
                 errors.append(f"{shot.get('id', label)} references unknown character: {cast_name}.")
             elif mode == "text-to-video" and identity_locks[key] not in prompt:
-                errors.append(
-                    f"{shot.get('id', label)} is text-to-video but does not contain the literal "
-                    f"identity lock for {cast_name}."
-                )
+                overlap = token_overlap(identity_locks[key], prompt)
+                if overlap >= lock_warn_overlap:
+                    warnings.append(
+                        f"{shot.get('id', label)} identity lock for {cast_name} appears reworded "
+                        f"(content-token overlap {overlap:.2f}). Keep the immutable block literally "
+                        "unchanged unless the rewrite is intentional."
+                    )
+                else:
+                    errors.append(
+                        f"{shot.get('id', label)} is text-to-video but does not contain the literal "
+                        f"identity lock for {cast_name}."
+                    )
 
         if mode in {"image-to-video", "multi-reference"}:
             if not isinstance(references, list) or not references:
                 errors.append(f"{shot.get('id', label)} is reference-led but lists no references.")
-        if mode == "multi-reference" and len(references) < 2:
+        if mode == "multi-reference" and isinstance(references, list) and len(references) < 2:
             warnings.append(f"{shot.get('id', label)} uses multi-reference mode with fewer than 2 references.")
 
         found_generic = [term for term in GENERIC_BEAUTY_TERMS if term in prompt]
@@ -126,8 +217,11 @@ def audit(data: dict[str, Any]) -> dict[str, Any]:
             )
 
         moves = [move for move in CAMERA_MOVES if re.search(rf"(?<!\w){re.escape(move)}(?!\w)", prompt)]
-        duration = shot.get("duration_seconds")
-        if len(moves) > 2 and isinstance(duration, (int, float)) and duration <= 8:
+        if (
+            len(moves) > max_camera_moves
+            and isinstance(duration, (int, float))
+            and duration <= max_shot_seconds
+        ):
             warnings.append(
                 f"{shot.get('id', label)} packs {len(moves)} camera moves into {duration}s: "
                 f"{', '.join(moves)}. Simplify to reduce identity stress."
@@ -140,7 +234,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("prompt_pack", type=Path)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    parser.add_argument("--lock-warn-overlap", type=float, default=0.85, help="Reworded identity locks with content-token overlap at or above this warn instead of failing (default: %(default)s).")
+    parser.add_argument("--max-camera-moves", type=int, default=2, help="Camera moves per shot before an overload warning (default: %(default)s).")
+    parser.add_argument("--max-shot-seconds", type=float, default=8.0, help="Shots at or below this duration trigger the camera-overload warning (default: %(default)s).")
     args = parser.parse_args()
+    if not 0 <= args.lock_warn_overlap <= 1:
+        parser.error("--lock-warn-overlap must be between 0 and 1")
+    if args.max_camera_moves < 0:
+        parser.error("--max-camera-moves must be 0 or greater")
+    if args.max_shot_seconds <= 0:
+        parser.error("--max-shot-seconds must be greater than 0")
 
     try:
         data = json.loads(args.prompt_pack.read_text(encoding="utf-8"))
@@ -148,7 +251,12 @@ def main() -> int:
         print(f"Could not read prompt pack: {exc}", file=sys.stderr)
         return 2
 
-    result = audit(data)
+    result = audit(
+        data,
+        lock_warn_overlap=args.lock_warn_overlap,
+        max_camera_moves=args.max_camera_moves,
+        max_shot_seconds=args.max_shot_seconds,
+    )
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:

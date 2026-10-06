@@ -54,6 +54,37 @@ STOPWORDS = {
     "eye",
 }
 
+# Generic anatomical vocabulary. Two characters share these words by
+# definition, so bigrams like 下巴 or 鼻梁 carry no similarity evidence; only
+# the distinguishing qualifiers around them should count.
+CJK_STOP_BIGRAMS = {
+    "下巴",
+    "下颌",
+    "人中",
+    "五官",
+    "嘴唇",
+    "鼻子",
+    "鼻梁",
+    "鼻尖",
+    "鼻翼",
+    "眼睛",
+    "眼距",
+    "眼窝",
+    "眼睑",
+    "眉毛",
+    "脸型",
+    "脸颊",
+    "颧骨",
+    "额头",
+    "皮肤",
+    "耳朵",
+    "耳垂",
+    "头发",
+    "发际",
+    "发型",
+    "轮廓",
+}
+
 SALIENCE_AXES = (
     "silhouette",
     "eye_spacing",
@@ -80,8 +111,12 @@ def tokens(value: Any) -> set[str]:
         for token in re.findall(r"[a-z0-9]+", text)
         if len(token) > 1 and token not in STOPWORDS
     }
-    cjk = "".join(re.findall(r"[\u3400-\u9fff]", text))
-    bigrams = {cjk[index : index + 2] for index in range(max(0, len(cjk) - 1))}
+    bigrams = {
+        sequence[index : index + 2]
+        for sequence in re.findall(r"[\u3400-\u9fff]+", text)
+        for index in range(max(0, len(sequence) - 1))
+        if sequence[index : index + 2] not in CJK_STOP_BIGRAMS
+    }
     return latin | bigrams
 
 
@@ -106,7 +141,12 @@ def axis_value(character: dict[str, Any], axis: str) -> str:
     return normalized(character.get(axis, ""))
 
 
-def audit(data: dict[str, Any]) -> dict[str, Any]:
+def audit(
+    data: dict[str, Any],
+    similar_axis: float = 0.72,
+    collision_axes: int = 5,
+    min_uniqueness: float = 55.0,
+) -> dict[str, Any]:
     characters = data.get("characters")
     errors: list[str] = []
     warnings: list[str] = []
@@ -166,11 +206,11 @@ def audit(data: dict[str, Any]) -> dict[str, Any]:
             right_value = axis_value(right, axis)
             score = similarity(left_value, right_value)
             axis_similarities[axis] = round(score, 3)
-            if score >= 0.72:
+            if score >= similar_axis:
                 shared.append(axis)
         mean_similarity = sum(axis_similarities.values()) / len(SALIENCE_AXES)
         uniqueness_score = round(100 * (1 - mean_similarity), 1)
-        collision = len(shared) >= 5 or uniqueness_score < 55
+        collision = len(shared) >= collision_axes or uniqueness_score < min_uniqueness
         if collision:
             warnings.append(
                 f"Likely cast collision: {left.get('name')} and {right.get('name')} "
@@ -198,7 +238,16 @@ def main() -> int:
         help="Path to a JSON file containing a `characters` list.",
     )
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    parser.add_argument("--similar-axis", type=float, default=0.72, help="Axis similarity at or above this counts as shared (default: %(default)s).")
+    parser.add_argument("--collision-axes", type=int, default=5, help="Shared axes at or above this count flag a collision (default: %(default)s).")
+    parser.add_argument("--min-uniqueness", type=float, default=55.0, help="Uniqueness score below this flags a collision (default: %(default)s).")
     args = parser.parse_args()
+    if not 0 <= args.similar_axis <= 1:
+        parser.error("--similar-axis must be between 0 and 1")
+    if args.collision_axes < 1:
+        parser.error("--collision-axes must be at least 1")
+    if not 0 <= args.min_uniqueness <= 100:
+        parser.error("--min-uniqueness must be between 0 and 100")
 
     try:
         data = json.loads(args.character_pack.read_text(encoding="utf-8"))
@@ -206,7 +255,12 @@ def main() -> int:
         print(f"Could not read character pack: {exc}", file=sys.stderr)
         return 2
 
-    result = audit(data)
+    result = audit(
+        data,
+        similar_axis=args.similar_axis,
+        collision_axes=args.collision_axes,
+        min_uniqueness=args.min_uniqueness,
+    )
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
