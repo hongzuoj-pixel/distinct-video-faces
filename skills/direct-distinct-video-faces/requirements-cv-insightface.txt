@@ -1,0 +1,8 @@
+# EXPERIMENTAL: optional ArcFace backend for audit_face_consistency.py
+# (--recognizer insightface). Install AFTER requirements-cv.txt, and supply a
+# recognition model via --recognizer-model (e.g. w600k_r50.onnx from the
+# buffalo_l pack published by the insightface project).
+#
+#   pip install -r skills/direct-distinct-video-faces/requirements-cv-insightface.txt
+onnxruntime
+insightface

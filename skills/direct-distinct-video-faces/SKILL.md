@@ -119,7 +119,7 @@ Use a gated workflow to avoid wasting video generations:
 5. Generate the remaining shots.
 6. Audit the edited sequence for cast convergence and within-character drift.
 
-For supplied clips, run `scripts/sample_video_frames.py` when `ffmpeg` and `ffprobe` are available. Inspect the sampled manifest at first, middle, last, and stress-motion timestamps against approved anchors. Do not use a single face-embedding score as proof: embeddings can miss perceived sameness, identity swaps during occlusion, or systematic beautification.
+For supplied clips, run `scripts/sample_video_frames.py` when `ffmpeg` is available (ffprobe is optional). It samples first, middle, and last frames plus the highest-motion stress frames. If `opencv-contrib-python` is installed, follow with `scripts/audit_face_consistency.py` to measure identity drift against the approved anchors and cross-identity similarity for the cast; pass one anchor still per recurring character via `--anchors`. Use anchor-free mode only for a single obvious subject. Treat a FAIL as a lead, not a verdict: inspect the flagged frames yourself before prescribing regeneration. Do not use a single face-embedding score as proof: embeddings can miss perceived sameness, identity swaps during occlusion, or systematic beautification.
 
 Keep seed, identity references, and immutable text fixed where supported. Change one causal layer at a time: identity, motion, camera, lighting, or styling.
 

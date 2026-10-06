@@ -1,0 +1,7 @@
+# Optional computer-vision extras for the embedding face audit.
+# The text audits (audit_character_pack.py, audit_prompt_pack.py) and the
+# frame sampler need none of these — they are stdlib + ffmpeg only.
+#
+#   pip install -r skills/direct-distinct-video-faces/requirements-cv.txt
+opencv-contrib-python>=4.8
+numpy
