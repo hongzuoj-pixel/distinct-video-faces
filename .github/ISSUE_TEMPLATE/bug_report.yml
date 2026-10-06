@@ -1,0 +1,61 @@
+name: Bug report
+description: Report a reproducible problem in the Skill, scripts, audits, or documentation.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please use synthetic, licensed, or consented inputs only.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v0.3.1 or commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Skill instructions
+        - Character-pack audit
+        - Prompt-pack audit
+        - Face-consistency audit
+        - Frame sampler
+        - Installation or discovery
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the command, sanitized input shape, and exact observed output.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: OS, Python version, agent/client, ffmpeg version if relevant
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets and private metadata.
+          required: true
+        - label: Any attached face media is synthetic, licensed, or shared with consent.
+          required: true

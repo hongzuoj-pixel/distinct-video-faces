@@ -1,0 +1,60 @@
+name: Showcase / before-and-after
+description: Share a reproducible cast-distinctiveness or identity-stability result.
+title: "[Showcase]: "
+labels: [showcase]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Model, product, and version
+      placeholder: Kling / Veo / Hailuo / Wan / ComfyUI workflow and version
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Test date
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Workflow
+      options:
+        - Text-to-video
+        - Image-to-video
+        - Local node workflow
+        - Mixed workflow
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: What stayed constant?
+      description: Describe shared seeds, references, settings, shot design, or other controls.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Before, after, and failures
+      description: Include generation counts, failed attempts, cost if known, and links or licensed attachments.
+    validations:
+      required: true
+  - type: textarea
+    id: audit
+    attributes:
+      label: Audit evidence
+      description: Paste a short human assessment and relevant face-audit summary when available.
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Rights and honesty
+      options:
+        - label: I have permission to share all attached media.
+          required: true
+        - label: I included failed attempts and did not present a cherry-picked frame as a universal result.
+          required: true

@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a focused improvement to the workflow or audit tools.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Creator problem
+      description: Describe the real AI-video failure or workflow cost, not only the proposed feature.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Concrete example
+      description: Name the model/workflow and explain when the problem appears.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Smallest useful improvement
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Validation idea
+      description: How should maintainers know the change works without overclaiming?
+    validations:
+      required: true
