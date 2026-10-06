@@ -27,6 +27,17 @@ Score every dimension from 0 to 4.
 
 Do not hide an identity failure with color grading, motion blur, or a fast cut unless the face is narratively incidental and the user accepts the tradeoff.
 
+## Reading embedding scores
+
+When `audit_face_consistency.py` runs, combine its cosine numbers with the scorecard above; never let either replace the other.
+
+- Near-duplicate clean crops can score 0.9+, but same-identity scores can fall substantially with pose, crop, blur, lighting, or stylization changes. OpenCV's documented SFace cosine threshold is 0.363 on its benchmark; treat it as a starting point, not a universal boundary.
+- Embeddings are less sensitive than raw pixels, but blur, dim light, occlusion, and angle can still move the score. A beautified face can also keep a high score while a human sees a change, so the scorecard's geometry dimension stays mandatory.
+- Relative drops carry more signal than absolute values: a character whose frames score 0.95 against the anchor and then 0.5 has a real discontinuity, even if 0.5 sits above the fail line.
+- Pairwise cast collision uses the highest observed cross-identity similarity, not the mean.
+- Identity discontinuity (character absent, unmatched face present) is a recast or occlusion event, not a gradual drift; repair accordingly.
+- Empty detections (`no_face_frames`) are framing or occlusion facts, not identity facts — check the frame before failing it.
+
 ## Failure diagnosis
 
 | Symptom | Likely cause | First repair |
