@@ -37,6 +37,24 @@ class SkillStructureTests(unittest.TestCase):
         for target in local_targets:
             self.assertTrue((SKILL / target).exists(), target)
 
+    def test_community_files_exist(self):
+        for path in (
+            "CONTRIBUTING.md",
+            "SECURITY.md",
+            ".github/PULL_REQUEST_TEMPLATE.md",
+            ".github/ISSUE_TEMPLATE/bug_report.yml",
+            ".github/ISSUE_TEMPLATE/feature_request.yml",
+            ".github/ISSUE_TEMPLATE/showcase.yml",
+            ".github/ISSUE_TEMPLATE/config.yml",
+        ):
+            self.assertTrue((ROOT / path).is_file(), path)
+
+    def test_social_preview_is_github_safe(self):
+        preview = ROOT / "assets" / "social-preview.jpg"
+        self.assertTrue(preview.is_file())
+        self.assertLess(preview.stat().st_size, 1_000_000)
+        self.assertEqual(preview.read_bytes()[:3], b"\xff\xd8\xff")
+
 
 if __name__ == "__main__":
     unittest.main()
