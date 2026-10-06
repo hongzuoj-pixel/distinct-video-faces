@@ -1,0 +1,60 @@
+{
+  "characters": [
+    {
+      "name": "Lin Qiao",
+      "age_read": "mid 20s",
+      "build": "compact, shoulders slightly forward",
+      "identity_lock": "Lin Qiao has a short face with a broad lower third, slightly close-set hooded eyes, a low straight nasal bridge with a rounded short tip, a short rounded chin, visible cheek texture, and a left brow that rests higher than the right.",
+      "immutable_features": {
+        "silhouette": "short face, broad lower third",
+        "eye_spacing": "slightly close-set",
+        "eyes_brows": "hooded eyes, left brow higher",
+        "nose": "low straight bridge, rounded short tip",
+        "mouth_philtrum": "medium-width mouth, short philtrum",
+        "jaw": "broad jaw, short rounded chin",
+        "ears": "small attached lobes"
+      },
+      "asymmetries": [
+        "left brow rests higher",
+        "smile begins on the right"
+      ],
+      "skin_texture": "visible pores and shallow left-cheek marks",
+      "hairline_grooming": "short forehead, slight widow's peak, right-side part",
+      "expression_baseline": "watchful with lightly tense jaw",
+      "movement_signature": "quick blink and chin-led turns",
+      "forbidden_drift": [
+        "no jaw narrowing",
+        "no eye enlargement",
+        "retain brow-height difference"
+      ]
+    },
+    {
+      "name": "Zhou Ning",
+      "age_read": "late 20s",
+      "build": "tall and upright",
+      "identity_lock": "Zhou Ning has a long face with a longer midface, slightly wide-set narrow eyes, a high narrow nasal bridge with a long subtly downturned tip, a rounded projecting chin, light freckles, and a sparse notch near the tail of the right brow.",
+      "immutable_features": {
+        "silhouette": "long face, narrow cheekbones",
+        "eye_spacing": "slightly wide-set",
+        "eyes_brows": "narrow eyes, right brow-tail notch",
+        "nose": "high narrow bridge, long downturned tip",
+        "mouth_philtrum": "wide mouth, long philtrum",
+        "jaw": "tapering jaw, rounded projecting chin",
+        "ears": "right helix projects slightly"
+      },
+      "asymmetries": [
+        "right brow sits lower",
+        "right ear projects farther"
+      ],
+      "skin_texture": "light freckles and faint smile lines",
+      "hairline_grooming": "high forehead, centered part, loose low tie",
+      "expression_baseline": "mouth corners slightly down, steady gaze",
+      "movement_signature": "slow blink and eyes follow a small head turn",
+      "forbidden_drift": [
+        "do not shorten midface",
+        "do not shorten nose",
+        "retain brow notch and freckles"
+      ]
+    }
+  ]
+}

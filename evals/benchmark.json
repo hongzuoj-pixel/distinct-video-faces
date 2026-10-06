@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "purpose": "Test whether the skill separates cast identities and preserves each identity under common AI-video stressors.",
+  "required_reporting": [
+    "generator and version",
+    "generation date",
+    "number of attempts",
+    "character-pack audit result",
+    "prompt-pack audit result",
+    "QC score by shot",
+    "failed outputs and repair applied"
+  ],
+  "scenarios": [
+    {
+      "id": "two-young-leads",
+      "brief": "Two women in their 20s argue in a convenience store without looking like variants of one influencer face.",
+      "stressors": ["same age band", "same scene", "dialogue", "two-shot"],
+      "acceptance": ["distinct without hair or wardrobe", "speech does not enlarge eyes or narrow jaw"]
+    },
+    {
+      "id": "siblings-not-clones",
+      "brief": "Adult siblings should plausibly share family resemblance without becoming identical.",
+      "stressors": ["intentional shared traits", "pairwise separation"],
+      "acceptance": ["two or three shared axes only", "stable individual profile and expression cues"]
+    },
+    {
+      "id": "age-diverse-ensemble",
+      "brief": "A four-person cast spanning 19 to 70 in one waiting room.",
+      "stressors": ["group shot", "age texture", "beautification pressure"],
+      "acceptance": ["age cues retained", "no common polished skin treatment"]
+    },
+    {
+      "id": "profile-turn",
+      "brief": "One character turns from frontal to near-profile and back.",
+      "stressors": ["angle robustness", "temporal identity drift"],
+      "acceptance": ["nose length and jaw silhouette remain stable", "marks do not migrate"]
+    },
+    {
+      "id": "spoken-closeup",
+      "brief": "A close-up delivers a short emotional line and ends in a restrained smile.",
+      "stressors": ["phonemes", "cheek compression", "smile prior"],
+      "acceptance": ["eye aperture and spacing remain stable", "smile does not beautify or symmetrize face"]
+    },
+    {
+      "id": "style-contamination",
+      "brief": "Two characters enter a highly stylized neon environment without inheriting faces from the style reference.",
+      "stressors": ["style reference", "lighting", "reference-role contamination"],
+      "acceptance": ["style changes color and texture only", "identity anchors remain readable"]
+    },
+    {
+      "id": "occlusion-recovery",
+      "brief": "A character briefly passes behind a foreground object and reappears.",
+      "stressors": ["occlusion", "re-entry", "temporal morphing"],
+      "acceptance": ["same identity after occlusion", "no landmark reset"]
+    },
+    {
+      "id": "restoration-collapse",
+      "brief": "Compare a clip before and after face restoration.",
+      "stressors": ["face-restorer prior", "texture loss"],
+      "acceptance": ["restoration does not replace geometry", "cast distance does not decrease"]
+    }
+  ]
+}

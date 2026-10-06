@@ -1,0 +1,38 @@
+{
+  "platform": "platform-neutral",
+  "characters": [
+    {
+      "name": "Lin Qiao",
+      "identity_lock": "Lin Qiao has a short face with a broad lower third, slightly close-set hooded eyes, a low straight nasal bridge with a rounded short tip, a short rounded chin, visible cheek texture, and a left brow that rests higher than the right."
+    },
+    {
+      "name": "Zhou Ning",
+      "identity_lock": "Zhou Ning has a long face with a longer midface, slightly wide-set narrow eyes, a high narrow nasal bridge with a long subtly downturned tip, a rounded projecting chin, light freckles, and a sparse notch near the tail of the right brow."
+    }
+  ],
+  "shots": [
+    {
+      "id": "S01",
+      "mode": "multi-reference",
+      "duration_seconds": 5,
+      "characters": [
+        "Lin Qiao",
+        "Zhou Ning"
+      ],
+      "references": [
+        "lin-qiao-three-quarter.png",
+        "zhou-ning-three-quarter.png"
+      ],
+      "prompt": "A slow push through a quiet convenience-store aisle as Lin Qiao leans slightly forward and Zhou Ning remains upright. Both breathe naturally and hold eye contact.",
+      "preserve": [
+        "Lin Qiao's broad lower third and higher left brow",
+        "Zhou Ning's long midface, long nose, and right brow-tail notch"
+      ],
+      "avoid": [
+        "identity blending",
+        "matching expressions",
+        "beauty retouching"
+      ]
+    }
+  ]
+}
