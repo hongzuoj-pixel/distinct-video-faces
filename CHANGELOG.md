@@ -9,7 +9,8 @@
 - Fixed empty-pair report rendering, threshold errors, ffprobe fallback, and frame-extraction fallbacks.
 - Tightened prompt-pack duration and duplicate-name validation.
 - Corrected the copyright holder to 金宏祚.
-- Expanded the standard-library test suite from 34 to 42 tests.
+- Added a GitHub social preview, structured issue forms, contribution guidance, and a security policy.
+- Expanded the standard-library test suite from 34 to 44 tests.
 
 ## 0.3.0 — Recognizer backends and visual reports
 

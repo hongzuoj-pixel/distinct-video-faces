@@ -1,9 +1,13 @@
 # Distinct Video Faces
 
+![Distinct Video Faces — stop casting the same AI face](assets/social-preview.jpg)
+
 [![CI](https://github.com/hongzuoj-pixel/distinct-video-faces/actions/workflows/validate.yml/badge.svg)](https://github.com/hongzuoj-pixel/distinct-video-faces/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/hongzuoj-pixel/distinct-video-faces?include_prereleases)](https://github.com/hongzuoj-pixel/distinct-video-faces/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-open%20format-111827)](skills/direct-distinct-video-faces/SKILL.md)
+
+[Install](#try-it-in-60-seconds) · [Face audit](#face-level-embedding-audit) · [Evaluation](#evaluation) · [Community](#community) · [中文](#中文快速开始)
 
 ## Stop casting the same AI face in every role.
 
@@ -252,6 +256,17 @@ Issues and pull requests are especially welcome for:
 - privacy-preserving local evaluation tools.
 
 Please do not submit unlicensed face datasets or real-person deepfake examples.
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before submitting a benchmark, fix, or platform adapter. It defines the minimum evidence needed for a reproducible result.
+
+## Community
+
+- **Show a before/after result:** use the repository's *Showcase / before-and-after* issue form.
+- **Report a reproducible problem:** use the structured bug-report form and include the model, version, date, generation count, and smallest safe reproduction.
+- **Ask or compare workflows:** join [GitHub Discussions](https://github.com/hongzuoj-pixel/distinct-video-faces/discussions) after checking for an existing thread.
+- **Follow stable versions:** see [GitHub Releases](https://github.com/hongzuoj-pixel/distinct-video-faces/releases).
+
+Please share failures as well as successful frames. Honest negative results make the workflow more useful than a gallery of cherry-picked outputs.
 
 ## 中文快速开始
 
