@@ -1,14 +1,6 @@
 interface:
-  display_name: Distinct Video Faces
-  short_description: Design distinctive, consistent human faces for AI video
-  default_prompt: Use $direct-distinct-video-faces to design distinctive characters
-    and a consistency-tested prompt pack for my AI video.
-  icon_small: assets/icon.svg
-  icon_large: assets/icon.svg
-policy:
-  products:
-  - chatgpt
-  - codex
-  - api
-  - atlas
-  allow_implicit_invocation: true
+  display_name: "Distinct Video Faces"
+  short_description: "Design distinctive, consistent AI-video characters"
+  default_prompt: "Use $direct-distinct-video-faces to design a distinctive cast, keep each identity stable, and produce a tested AI-video prompt pack."
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
