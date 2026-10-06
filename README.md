@@ -93,8 +93,8 @@ python3 skills/direct-distinct-video-faces/scripts/audit_character_pack.py \
 python3 skills/direct-distinct-video-faces/scripts/audit_prompt_pack.py \
   examples/prompt-pack.json
 
-# Sample a video for first/middle/last and motion-stress QC
-# Requires ffmpeg + ffprobe
+# Sample a video for first/middle/last plus the highest-motion stress frames
+# Requires ffmpeg (ffprobe optional)
 python3 skills/direct-distinct-video-faces/scripts/sample_video_frames.py clip.mp4 \
   --out audit-frames --samples 7
 ```
@@ -107,6 +107,67 @@ PAIR: Lin Qiao / Zhou Ning | uniqueness: 82.6/100 | similar axes: none
 ```
 
 The score is a production warning signal, not a scientific claim that facial identity can be reduced to one number. Human review remains the final gate.
+
+## Face-level embedding audit
+
+Text audits cannot see rendered pixels. For measured face QC, the optional
+`audit_face_consistency.py` detects every face with the YuNet detector,
+extracts 128-dimensional SFace embeddings, and compares them by cosine
+similarity:
+
+- **Within-character drift** — each sampled frame against the character's
+  approved anchor still (or the most central frame when no anchors exist),
+  with the worst frame pinpointed.
+- **Between-character distinctiveness** — cross-identity similarity across
+  all frames and inside two-shots, so cast convergence is measured, not guessed.
+- **Identity discontinuities** — a frame where a character is missing while an
+  unmatched near-miss face appears (recast, heavy drift, or an extra).
+
+```bash
+pip install -r skills/direct-distinct-video-faces/requirements-cv.txt
+
+python3 skills/direct-distinct-video-faces/scripts/audit_face_consistency.py \
+  clip.mp4 --anchors anchors/ --out face-report.json
+```
+
+Models download automatically on first use (~39 MB, SHA256-verified, cached in
+`~/.cache/distinct-video-faces/models`; override with `--models-dir` or
+`DVF_MODELS_DIR`). A real run on a two-identity clip reports:
+
+```text
+FACE AUDIT — clip8s.mp4 — FAIL
+Model: sface:face_recognition_sface_2021dec.onnx embeddings, cosine metric | frames: 9
+  Lin Qiao: 4/9 frames, drift mean 0.9777 min 0.9411 (frame 6) — PASS
+  Zhou Ning: 2/9 frames, drift mean 0.5699 min 0.2812 (frame 5) — FAIL
+  PAIR Lin Qiao / Zhou Ning: mean 0.0712 max 0.0899 — PASS
+  NOTE: identity drift: Zhou Ning drops to 0.2812 similarity at frame 5.
+```
+
+Add `--report-dir out/` to get the same audit as annotated frames (boxes,
+similarity tags, red borders on flagged frames) plus a single-file
+`report.html` with the tables and gallery embedded — the artifact a human
+reviewer or agent opens first.
+
+Recognizer backends: the default `--recognizer sface` uses OpenCV's light
+128-d SFace. An experimental `--recognizer insightface` swaps in 512-d ArcFace
+(`pip install -r requirements-cv-insightface.txt`, then point
+`--recognizer-model` at a recognition ONNX such as `w600k_r50.onnx` from the
+buffalo_l pack). Threshold defaults are per-backend; re-tune either one per
+pipeline.
+
+How to read the numbers honestly: near-duplicate clean crops can score 0.9+,
+but same-identity scores can be much lower when pose, crop, blur, lighting, or
+stylization changes. OpenCV documents 0.363 as SFace's cosine decision
+threshold on its benchmark; that is a starting point, not a universal law for
+AI-video frames. Cast-collision gates use the highest observed cross-identity
+similarity so one severe collision is not hidden by a low average. All
+thresholds are CLI flags (`--drift-fail`, `--collision-*`, and friends) — tune
+them per pipeline, and treat every FAIL as a lead for visual confirmation.
+
+Anchor-free mode is useful for a single obvious subject. If sampled frames
+contain multiple people, provide one approved anchor image per recurring
+character; otherwise the report is marked REVIEW because drift attribution is
+ambiguous.
 
 Data formats are documented in [`data-contracts.md`](skills/direct-distinct-video-faces/references/data-contracts.md), with ready-to-run packs under [`examples/`](examples/).
 
@@ -147,7 +208,13 @@ The repository can also be installed for Claude Code, Cursor, Gemini CLI, GitHub
 
 ## Honest status
 
-This is a public beta. The workflow, data contracts, audits, tests, and installation path are implemented; broader before/after generation benchmarks across platforms are the next milestone.
+This is a public beta. The workflow, data contracts, text audits, tests, and installation path are implemented. The embedding-based face audit measures rendered output with real detections and embeddings, but it is a screening tool: embeddings miss what humans catch (and vice versa), thresholds are heuristics, and no face-embedding score is identity proof.
+
+The optional face audit runs locally: these scripts do not upload clips,
+frames, or embeddings. On first use they download the pinned YuNet and SFace
+model files from OpenCV Zoo and verify exact file sizes and SHA256 checksums.
+Review the upstream model terms and training-data provenance for your own
+commercial compliance requirements.
 
 The skill reduces convergence and identity-drift risk. It cannot make a probabilistic generator deterministic, modify model weights, or rescue every long dialogue, occlusion, rapid head turn, or crowded multi-person shot. Platform capabilities also change, so current controls should be checked against official documentation.
 
@@ -172,7 +239,6 @@ Useful neighboring projects include:
 - [`divolleggett/character-consistency-skill`](https://github.com/divolleggett/character-consistency-skill)
 - [`Nagacash/character-continuity-skill`](https://github.com/Nagacash/character-continuity-skill)
 - [`GenielabsOpenSource/style-consistency-ai`](https://github.com/GenielabsOpenSource/style-consistency-ai)
-- [`Gusanidas/different-faces-pipeline`](https://github.com/Gusanidas/different-faces-pipeline)
 - [`vercel-labs/skills`](https://github.com/vercel-labs/skills)
 
 ## Contributing
@@ -211,6 +277,8 @@ npx skills@latest add hongzuoj-pixel/distinct-video-faces
 ```
 
 你也可以上传已经生成的图片或视频，让它找出哪些角色长得太像、哪一个镜头发生了变脸，以及最省成本的重生成方案。
+
+除了文本层面的审计，仓库还提供可选的**人脸级 embedding 审计**：`pip install opencv-contrib-python` 之后，用 `audit_face_consistency.py` 传入视频和锚点参考图，脚本会检测每一帧人脸、提取 SFace 向量，给出每个角色的漂移分数（最低分定位到具体帧）、不同角色之间的相似度（撞脸检测），以及“角色被换人”式的身份断点告警。首次运行会自动下载约 39 MB 的模型（带 SHA256 校验）。分数只用来定位和排序问题，边界案例仍需人眼确认。
 
 如果它帮助了你的项目，欢迎提交测试结果、Issue 或 Pull Request。真实的失败案例和修复过程，比只展示一张最好看的成片更有价值。
 
