@@ -15,10 +15,12 @@ class SkillStructureTests(unittest.TestCase):
         self.assertTrue((SKILL / "agents" / "openai.yaml").is_file())
         for script in (
             "audit_character_pack.py",
+            "audit_face_consistency.py",
             "audit_prompt_pack.py",
             "sample_video_frames.py",
         ):
             self.assertTrue((SKILL / "scripts" / script).is_file())
+        self.assertTrue((SKILL / "requirements-cv.txt").is_file())
 
     def test_frontmatter_has_name_and_description(self):
         text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
