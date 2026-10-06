@@ -22,7 +22,7 @@ npx skills@latest add hongzuoj-pixel/distinct-video-faces
 Install globally for Codex without prompts:
 
 ```bash
-npx skills@latest add YOUR_GITHUB_USERNAME/distinct-video-faces \
+npx skills@latest add hongzuoj-pixel/distinct-video-faces \
   --skill direct-distinct-video-faces -g -a codex -y
 ```
 
